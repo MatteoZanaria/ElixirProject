@@ -1,16 +1,41 @@
-use rustler::{Env, Term, NifResult, Encoder};
-use client_crate::{connect, disconnect};  // Importa le funzioni dal tuo crate
+use rustler::{NifResult, Env, Term};
+use my_websocket_crate::WebSocketManager; // Import della Struct del Crate
+use tokio::runtime::Runtime; // Per gestire le funzioni async
+use once_cell::sync::Lazy;
+use url::Url;
 
-#[rustler::nif]
+// Mantieni un unico `WebSocketManager` globale
+static MANAGER: Lazy<WebSocketManager> = Lazy::new(|| WebSocketManager::new());
+
+// Configura il runtime Tokio una volta sola
+static TOKIO: Lazy<Runtime> = Lazy::new(|| {
+    Runtime::new().expect("Failed to create Tokio runtime")
+});
+
+// NIF per la connessione
+#[rustler::nif(schedule = "DirtyIo")]
 fn elixir_connect(url: String) -> NifResult<String> {
-    let id = connect(url);  // Chiama la funzione dal crate lib.rs
+    // Parsing URL
+    let parsed_url = Url::parse(&url).map_err(|_| rustler::Error::Atom("invalid_url"))?;
+
+    // Esegui la connessione asincrona utilizzando Tokio
+    let id = TOKIO.block_on(async {
+        MANAGER.start_connection(parsed_url).await
+    }).map_err(|e| rustler::Error::Term(Box::new(e)))?;
+
     Ok(id)
 }
 
-#[rustler::nif]
+// NIF per la disconnessione
+#[rustler::nif(schedule = "DirtyIo")]
 fn elixir_disconnect(id: String) -> NifResult<()> {
-    disconnect(id);  // Chiama la funzione dal crate lib.rs
+    // Esegui la disconnessione asincrona
+    TOKIO.block_on(async {
+        MANAGER.stop_connection(&id).await
+    }).map_err(|e| rustler::Error::Term(Box::new(e)))?;
+
     Ok(())
 }
 
-rustler::init!("Elixir.ElixirClient", [elixir_connect, elixir_disconnect]);
+// Collegamento funzioni native Rust al modulo Elixir
+rustler::init!("Elixir.ElixirClient");

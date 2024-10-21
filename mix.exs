@@ -34,10 +34,10 @@ defmodule ElixirClient.MixProject do
   defp deps do
     [
       {:jason, "~> 1.4.4"},
-      {:toml, "~> 0.7.0"},
+      {:toml, "~> 0.7"},
 
       # AGGIUNTA RUSTLER +++
-      {:rustler, "~> 0.27.0"} 
+      {:rustler, "~> 0.34"} 
     ]
   end
 

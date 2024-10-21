@@ -1,4 +1,4 @@
-use rustler::{NifResult, Env, Term};
+use rustler::NifResult;
 use my_websocket_crate::WebSocketManager; // Import della Struct del Crate
 use tokio::runtime::Runtime; // Per gestire le funzioni async
 use once_cell::sync::Lazy;

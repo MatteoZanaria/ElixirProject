@@ -37,7 +37,7 @@ defmodule ElixirClient.MixProject do
       {:toml, "~> 0.7"},
 
       # AGGIUNTA RUSTLER +++
-      {:rustler, "~> 0.34"} 
+      {:rustler, "~> 0.35.0"}
     ]
   end
 

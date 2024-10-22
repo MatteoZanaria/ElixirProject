@@ -10,7 +10,7 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-rustler = { version = "0.35.0", features = ["nif_version_2_17"] }
+rustler = "0.35.0" 
 
 my_websocket_crate = { path = "../../../../../my_websocket_crate" } # DIPENDEZA AL MIO CRATE
 
